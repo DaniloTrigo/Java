@@ -1,4 +1,4 @@
-package figures;
+package Figures;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;

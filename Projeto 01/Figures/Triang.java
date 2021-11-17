@@ -1,4 +1,4 @@
-package figures;
+package Figures;
 
 import java.awt.*;
 public class Triang extends Figure{
