@@ -1,20 +1,23 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import javax.swing.*;
 import java.util.ArrayList;
-import figures.*;
+import Figures.*;
 
 public class Window extends JPanel {
     private static final long serialVersionUID = 1L;
     private ArrayList<Figure> figs = new ArrayList<Figure>();
+    private ArrayList<Button> botoes = new ArrayList<Button>();
     private Figure focus;
+    private Button focusB;
     private int mouseX;
     private int mouseY;
     private int mX;
     private int mY;
-    private Texto Comandos1 = new Texto("R: Retangulo   E: Elipse  T: Triangulo Equilatero Y: Retangulo arredondado", "Arial", 0, 10, 435, 15, 0, 0, 255, 255, 0);
-    private Texto Comandos2 = new Texto("1-Vermelho   2-Verde   3-Azul   4-Amarelo   5-Branco   6-Preto", "Arial", 0, 10, 450, 15, 0, 0, 255, 255, 0);
-    private Texto Comandos3 = new Texto("Redimensionar(Cima/Direita aumentam e Baixo/Esquerda diminuem) TAB=Foco", "Arial", 0, 10, 465, 15, 0, 0, 255, 255, 0);
+    private Texto Comandosl = new Texto("R: Retangulo   E: Elipse   Y: Retangulo Arredondado   U: Triangulo Equilatero   T: Texto(Teclado)", "Calibri", 0, 10, 435, 13, 0, 0, 255, 0, 0);
+    private Texto Comandos2 = new Texto("1-Vermelho   2-Verde   3-Azul   4-Amarelo   9-Branco   0-Preto   (Para controno ou Texto use o NUMPAD)", "Calibri", 0, 10, 450, 13, 0, 0, 255, 0, 0);
+    private Texto Comandos3 = new Texto("Setinhas para Redimensionar(Cima/Direita aumentam e Baixo/Esquerda diminuem)   DEL-Deletar   TAB-Foco   F4-Salvar", "Calibri", 0, 10, 465, 13, 0, 0, 255, 0, 0);
     
     Window(){
     
@@ -22,7 +25,21 @@ public class Window extends JPanel {
     setDoubleBuffered(true);
     setFocusTraversalKeysEnabled(false);
     
+    
+    try{
+        FileInputStream f = new FileInputStream ("proj.bin");
+        ObjectInputStream o = new ObjectInputStream(f);
+        this.figs = (ArrayList<Figure>) o.readObject();
+        o.close();
+        } catch (Exception x){
+            System.out.println("ERRO!");
+        }
 
+    botoes.add(new Button(1, 5, 5, 30, 30, new Rect(10, 9, 18, 20, 255, 0, 0, 255, 0, 0)));
+    botoes.add(new Button(2, 5, 40, 30, 30, new Ellipse(9, 45, 20, 20, 255, 0, 0, 255, 0, 0)));
+    botoes.add(new Button(3, 5, 75, 30, 30, new RectRedon(8, 78, 22, 22, 255, 0, 0, 255, 0, 0)));
+    botoes.add(new Button(4, 5, 110, 30, 30, new Triang(8, 113, 22, 22, 255, 0, 0, 255, 0, 0)));
+    botoes.add(new Button(5, 5, 145, 30, 30, new Texto("T", "Times New Roman", 1, 12, 168, 25, 0, 0, 255, 0, 0)));
     this.addKeyListener (
         new KeyAdapter(){
             public void keyPressed (KeyEvent evt) {
@@ -52,6 +69,11 @@ public class Window extends JPanel {
                     repaint();
                 }
                 if (evt.getKeyCode() == KeyEvent.VK_T) {
+                    figs.add(new Texto("", "Arial", 1, x, y, 20, 0, 0, r, g, b));
+                    focus = figs.get(figs.size()-1);
+                    repaint();
+                }
+                if (evt.getKeyCode() == KeyEvent.VK_U) {
                     figs.add(new Triang(x, y, w, h, r, g, b, rf, gf, bf));
                     focus = figs.get(figs.size()-1);
                     repaint();
@@ -67,11 +89,31 @@ public class Window extends JPanel {
                         }
                     }
                 }
-
+                if (evt.getKeyCode() == KeyEvent.VK_F4){
+                    try{
+                        FileOutputStream f = new FileOutputStream("proj.bin");
+                        ObjectOutputStream o = new ObjectOutputStream(f);
+                        o.writeObject(figs);
+                        o.flush();
+                        o.close();
+                    } catch (Exception xException){
+                    }
+                }
                 if (focus!=null){
                     if (evt.getKeyCode() >= 32 && evt.getKeyCode() < 127 || evt.getKeyCode() == KeyEvent.VK_BACK_SPACE){
                         focus.keyPressed(evt);
                         repaint();
+                    }
+                    else{
+                        if (evt.getKeyCode() == KeyEvent.VK_DELETE){
+                            figs.remove(focus);
+                            focus=null;
+                            repaint();
+                        }
+                        else if (! (evt.isActionKey() || evt.isControlDown() || evt.isShiftDown())){ 
+                            focus.keyPressed(evt);
+                            repaint();
+                        }
                     }
                 }
 
@@ -102,9 +144,52 @@ public class Window extends JPanel {
                         repaint();
                     }
                 }
-
+                
+                if(focusB!=null && (mouseX>35 || mouseY>170)){
+                    if (focusB.idx==1){
+                        figs.add(new Rect(mouseX,mouseY, 50,50, 255,255,255, 0,0,0));
+                        focus = figs.get(figs.size()-1);
+                        repaint();
+                    }
+                    else if (focusB.idx==2){
+                        figs.add(new Ellipse(mouseX,mouseY, 50,50, 255,255,255, 0,0,0));
+                        focus = figs.get(figs.size()-1);
+                        repaint();
+                    }
+                    else if (focusB.idx==3){
+                        figs.add(new RectRedon(mouseX,mouseY, 50,50, 255,255,255, 0,0,0));
+                        focus = figs.get(figs.size()-1);
+                        repaint();
+                    }
+                    else if (focusB.idx==4){
+                        figs.add(new Triang(mouseX,mouseY, 50,50, 255,255,255, 0,0,0));
+                        focus = figs.get(figs.size()-1);
+                        repaint();
+                    }
+                    else if (focusB.idx==5){
+                        figs.add(new Texto("", "Arial", 1, mouseX, mouseY, 20, 0, 0, 255, 255, 255));
+                        focus = figs.get(figs.size()-1);
+                        repaint();
+                    }
+                    focusB = null;
+                    repaint();
+                }
+                for (Button botao:botoes)
+                {
+                    if (botao.clicked(mouseX, mouseY))
+                    {
+                        focusB = botao;
+                        focusB.foco = true;
+                        repaint();
+                        break;
+                    }
+                    else{
+                        focusB = null;
+                        repaint();
+                    }
                 }
             }
+        }
     );
 
     this.addMouseMotionListener(
@@ -131,15 +216,18 @@ public void paint (Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
     g2d.setColor(Color.BLACK);
     g2d.fillRect(0, 0, 2000, 1500);
-    Comandos1.paint(g, true);
+    Comandosl.paint(g, true);
     Comandos2.paint(g, true);
     Comandos3.paint(g, true);
     for (Figure fig: figs) {
         fig.paint(g,true);
     }
     if (focus!=null){
-        g2d.setColor(Color.BLUE);
+        g2d.setColor(Color.RED);
         focus.criaFoco(g);
     }
+    for (Button botao: botoes){
+        botao.paint(g, botao==focusB);
+    }       
 }
 }
