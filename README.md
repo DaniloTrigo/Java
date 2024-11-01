@@ -1,5 +1,4 @@
-# LP2
+# Projeto de Paint em JAVA
 
-Olá, me chamo Danilo, tenho 21 anos e estou cursando Ciência da computação na Uerj. 
-
-Sou bolsista e trabalho atualmente usando o Rstudio.
+Projeto de um "paint" onde você pode criar figuras e trocar suas cores dependendo da tecla que utilizar. 
+Podendo focar em uma figura específica se quiser.
